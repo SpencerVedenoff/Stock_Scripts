@@ -12,16 +12,21 @@ def get_trading_signal():
     # Fetch NVDA last 20 days of data
     stock_data = yf.download(STOCK_SYMBOL, period="1mo", interval="1d")
 
-    # Calculate 20-day SMA & standard deviation
-    sma_20 = stock_data["Close"].rolling(window=SMA_PERIOD).mean().iloc[-1]
-    std_20 = stock_data["Close"].rolling(window=SMA_PERIOD).std().iloc[-1]
+    # Ensure we have enough data
+    if len(stock_data) < SMA_PERIOD:
+        print("⚠️ Not enough data to calculate SMA. Waiting for more data.")
+        return
+
+    # Calculate 20-day SMA & standard deviation (convert to float)
+    sma_20 = float(stock_data["Close"].rolling(window=SMA_PERIOD).mean().iloc[-1])
+    std_20 = float(stock_data["Close"].rolling(window=SMA_PERIOD).std().iloc[-1])
 
     # Calculate Bollinger Bands
     upper_band = sma_20 + (STD_FACTOR * std_20)
     lower_band = sma_20 - (STD_FACTOR * std_20)
 
-    # Get latest closing price
-    latest_price = stock_data["Close"].iloc[-1]
+    # Get latest closing price (Ensure it's a float)
+    latest_price = float(stock_data["Close"].iloc[-1])
 
     # Print the values
     print(f"\n🔹 NVDA Trading Update 🔹")
